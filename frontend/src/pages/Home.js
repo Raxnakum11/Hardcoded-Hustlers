@@ -88,98 +88,35 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="card text-center">
-          <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-3">
-            <MessageSquare className="text-blue-600" size={24} />
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{stats.totalQuestions.toLocaleString()}</div>
-          <div className="text-gray-600">Questions</div>
+      {/* Recent Questions Only */}
+      <div className="card max-w-2xl mx-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">Recent Questions</h2>
+          <Link to="/questions" className="text-primary-600 hover:text-primary-700 text-sm flex items-center">
+            View all
+            <ArrowRight size={16} className="ml-1" />
+          </Link>
         </div>
-        
-        <div className="card text-center">
-          <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mx-auto mb-3">
-            <TrendingUp className="text-green-600" size={24} />
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{stats.totalAnswers.toLocaleString()}</div>
-          <div className="text-gray-600">Answers</div>
-        </div>
-        
-        <div className="card text-center">
-          <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mx-auto mb-3">
-            <Users className="text-purple-600" size={24} />
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{stats.totalUsers.toLocaleString()}</div>
-          <div className="text-gray-600">Users</div>
-        </div>
-        
-        <div className="card text-center">
-          <div className="flex items-center justify-center w-12 h-12 bg-orange-100 rounded-lg mx-auto mb-3">
-            <Tag className="text-orange-600" size={24} />
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{stats.totalTags.toLocaleString()}</div>
-          <div className="text-gray-600">Tags</div>
-        </div>
-      </div>
-
-      {/* Recent Questions and Popular Tags */}
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Recent Questions */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Questions</h2>
-            <Link to="/questions" className="text-primary-600 hover:text-primary-700 text-sm flex items-center">
-              View all
-              <ArrowRight size={16} className="ml-1" />
-            </Link>
-          </div>
-          
-          <div className="space-y-4">
-            {recentQuestions.map((question) => (
-              <div key={question._id} className="border-b border-gray-100 pb-4 last:border-b-0">
-                <Link 
-                  to={`/questions/${question._id}`}
-                  className="block hover:text-primary-600 transition-colors"
-                >
-                  <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
-                    {question.title}
-                  </h3>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{question.author?.username}</span>
-                    <div className="flex items-center space-x-4">
-                      <span>{question.answerCount || 0} answers</span>
-                      <span>{question.voteCount || 0} votes</span>
-                    </div>
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Popular Tags */}
-        <div className="card">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Popular Tags</h2>
-            <Link to="/tags" className="text-primary-600 hover:text-primary-700 text-sm flex items-center">
-              View all
-              <ArrowRight size={16} className="ml-1" />
-            </Link>
-          </div>
-          
-          <div className="flex flex-wrap gap-2">
-            {popularTags.map((tag) => (
-              <Link
-                key={tag._id}
-                to={`/questions?tag=${tag._id}`}
-                className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-700 hover:bg-primary-100 hover:text-primary-700 transition-colors"
+        <div className="space-y-4">
+          {recentQuestions.map((question) => (
+            <div key={question._id} className="border-b border-gray-100 pb-4 last:border-b-0">
+              <Link 
+                to={`/questions/${question._id}`}
+                className="block hover:text-primary-600 transition-colors"
               >
-                {tag._id}
-                <span className="ml-1 text-xs text-gray-500">({tag.count})</span>
+                <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
+                  {question.title}
+                </h3>
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <span>{question.author?.username}</span>
+                  <div className="flex items-center space-x-4">
+                    <span>{question.answerCount || 0} answers</span>
+                    <span>{question.voteCount || 0} votes</span>
+                  </div>
+                </div>
               </Link>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
 

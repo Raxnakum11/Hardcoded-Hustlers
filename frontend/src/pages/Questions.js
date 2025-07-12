@@ -1,37 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Search, 
-  Filter, 
-  Plus, 
-  MessageSquare, 
-  Eye, 
-  ThumbsUp, 
-  ThumbsDown,
-  Clock,
+import {
+  ChevronDown,
+  Search,
+  Plus,
+  MessageSquare,
   User,
   Tag
 } from 'lucide-react';
 import axios from 'axios';
-import { formatDistanceToNow } from 'date-fns';
+
+const FILTERS = [
+  { label: 'Newest', value: 'newest' },
+  { label: 'Unanswered', value: 'unanswered' },
+];
+
+const MORE_FILTERS = [
+  { label: 'Most Voted', value: 'votes' },
+  { label: 'Most Viewed', value: 'views' },
+];
 
 const Questions = () => {
   const { isAuthenticated } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  
   const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({});
+  const [pagination, setPagination] = useState({ current: 1, total: 1 });
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
     sort: searchParams.get('sort') || 'newest',
-    tag: searchParams.get('tag') || ''
   });
+  const [showMore, setShowMore] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchQuestions();
-  }, [filters]);
+    // eslint-disable-next-line
+  }, [filters, pagination.current]);
 
   const fetchQuestions = async () => {
     setLoading(true);
@@ -39,238 +44,119 @@ const Questions = () => {
       const params = new URLSearchParams();
       if (filters.search) params.append('search', filters.search);
       if (filters.sort) params.append('sort', filters.sort);
-      if (filters.tag) params.append('tag', filters.tag);
-      params.append('page', searchParams.get('page') || '1');
-
+      params.append('page', pagination.current);
       const response = await axios.get(`/questions?${params.toString()}`);
       setQuestions(response.data.questions);
       setPagination(response.data.pagination);
-      
-      // Update URL params
-      const newParams = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) newParams.append(key, value);
-      });
-      setSearchParams(newParams);
     } catch (error) {
-      console.error('Error fetching questions:', error);
+      setQuestions([]);
+      setPagination({ current: 1, total: 1 });
     } finally {
       setLoading(false);
     }
   };
 
+  const handleFilter = (value) => {
+    setFilters((prev) => ({ ...prev, sort: value }));
+    setPagination((prev) => ({ ...prev, current: 1 }));
+    setShowMore(false);
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
+    setPagination((prev) => ({ ...prev, current: 1 }));
     fetchQuestions();
   };
 
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+  const handlePage = (page) => {
+    setPagination((prev) => ({ ...prev, current: page }));
   };
-
-  const handleVote = async (questionId, voteType) => {
-    if (!isAuthenticated) {
-      alert('Please login to vote');
-      return;
-    }
-
-    try {
-      await axios.post(`/questions/${questionId}/vote`, { voteType });
-      // Refresh questions to get updated vote counts
-      fetchQuestions();
-    } catch (error) {
-      console.error('Error voting:', error);
-    }
-  };
-
-  const getSortOptions = () => [
-    { value: 'newest', label: 'Newest' },
-    { value: 'votes', label: 'Most Voted' },
-    { value: 'views', label: 'Most Viewed' },
-    { value: 'unanswered', label: 'Unanswered' }
-  ];
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-96">
-        <div className="text-gray-500">Loading questions...</div>
-      </div>
-    );
-  }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Questions</h1>
-          <p className="text-gray-600 mt-1">
-            {pagination.total ? `${pagination.total} questions` : 'No questions found'}
-          </p>
-        </div>
-        {isAuthenticated && (
-          <Link to="/ask" className="btn-primary flex items-center">
-            <Plus size={20} className="mr-2" />
-            Ask Question
-          </Link>
-        )}
-      </div>
-
-      {/* Search and Filters */}
-      <div className="card">
-        <form onSubmit={handleSearch} className="space-y-4">
-          {/* Search Bar */}
+    <div className="max-w-3xl mx-auto py-8">
+      {/* Filters and Search */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div className="flex gap-2 items-center">
+          {isAuthenticated && (
+            <Link to="/ask" className="btn-primary text-sm font-semibold">
+              <Plus size={16} className="inline mr-1" /> Ask New question
+            </Link>
+          )}
+          {FILTERS.map((f) => (
+            <button
+              key={f.value}
+              className={`px-4 py-2 rounded border text-sm font-medium ${filters.sort === f.value ? 'bg-primary-600 text-white' : 'bg-gray-800 text-gray-100 border-gray-700 hover:bg-primary-700'}`}
+              onClick={() => handleFilter(f.value)}
+            >
+              {f.label}
+            </button>
+          ))}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search questions..."
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="input-field pl-10"
-            />
-          </div>
-
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Sort by
-              </label>
-              <select
-                value={filters.sort}
-                onChange={(e) => handleFilterChange('sort', e.target.value)}
-                className="input-field"
-              >
-                {getSortOptions().map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
+            <button
+              className={`px-4 py-2 rounded border text-sm font-medium flex items-center gap-1 ${showMore ? 'bg-primary-600 text-white' : 'bg-gray-800 text-gray-100 border-gray-700 hover:bg-primary-700'}`}
+              onClick={() => setShowMore((v) => !v)}
+            >
+              more <ChevronDown size={16} />
+            </button>
+            {showMore && (
+              <div className="absolute z-10 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg">
+                {MORE_FILTERS.map((f) => (
+                  <button
+                    key={f.value}
+                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-primary-50"
+                    onClick={() => handleFilter(f.value)}
+                  >
+                    {f.label}
+                  </button>
                 ))}
-              </select>
-            </div>
-            
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tag filter
-              </label>
-              <input
-                type="text"
-                placeholder="Filter by tag..."
-                value={filters.tag}
-                onChange={(e) => handleFilterChange('tag', e.target.value)}
-                className="input-field"
-              />
-            </div>
+              </div>
+            )}
           </div>
+        </div>
+        <form onSubmit={handleSearch} className="flex items-center w-full md:w-auto">
+          <input
+            type="text"
+            placeholder="Search"
+            value={filters.search}
+            onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
+            className="input-field w-full md:w-64 bg-gray-900 text-gray-100 border-gray-700"
+          />
+          <button type="submit" className="ml-2 p-2 rounded bg-primary-600 hover:bg-primary-700 text-white">
+            <Search size={18} />
+          </button>
         </form>
       </div>
 
       {/* Questions List */}
-      <div className="space-y-4">
-        {questions.length === 0 ? (
-          <div className="card text-center py-12">
-            <MessageSquare size={48} className="mx-auto text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No questions found</h3>
-            <p className="text-gray-600 mb-4">
-              {filters.search || filters.tag 
-                ? 'Try adjusting your search or filters'
-                : 'Be the first to ask a question!'
-              }
-            </p>
-            {isAuthenticated && (
-              <Link to="/ask" className="btn-primary">
-                Ask the First Question
-              </Link>
-            )}
-          </div>
+      <div className="space-y-6">
+        {loading ? (
+          <div className="text-center text-gray-400 py-12">Loading questions...</div>
+        ) : questions.length === 0 ? (
+          <div className="text-center text-gray-400 py-12">No questions found.</div>
         ) : (
-          questions.map((question) => (
-            <div key={question._id} className="card hover:shadow-md transition-shadow">
-              <div className="flex gap-4">
-                {/* Vote Stats */}
-                <div className="flex flex-col items-center space-y-2 min-w-[80px]">
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-gray-900">
-                      {question.voteCount || 0}
-                    </div>
-                    <div className="text-xs text-gray-500">votes</div>
-                  </div>
-                  
-                  {isAuthenticated && (
-                    <div className="flex flex-col space-y-1">
-                      <button
-                        onClick={() => handleVote(question._id, 'upvote')}
-                        className="p-1 text-gray-400 hover:text-green-600 transition-colors"
-                        title="Upvote"
-                      >
-                        <ThumbsUp size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleVote(question._id, 'downvote')}
-                        className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                        title="Downvote"
-                      >
-                        <ThumbsDown size={16} />
-                      </button>
-                    </div>
-                  )}
+          questions.map((q) => (
+            <div key={q._id} className="bg-gray-900 border border-gray-700 rounded-lg p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex-1">
+                <Link to={`/questions/${q._id}`} className="block text-lg font-semibold text-primary-400 hover:underline mb-1">
+                  {q.title}
+                </Link>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {q.tags?.map((tag) => (
+                    <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded bg-gray-800 text-xs text-primary-300 border border-primary-700">
+                      <Tag size={12} className="mr-1" /> {tag}
+                    </span>
+                  ))}
                 </div>
-
-                {/* Question Content */}
-                <div className="flex-1">
-                  <Link 
-                    to={`/questions/${question._id}`}
-                    className="block hover:text-primary-600 transition-colors"
-                  >
-                    <h3 className="text-lg font-medium text-gray-900 mb-2 line-clamp-2">
-                      {question.title}
-                    </h3>
-                  </Link>
-                  
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {question.tags?.map((tag) => (
-                      <Link
-                        key={tag}
-                        to={`/questions?tag=${tag}`}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary-100 text-primary-700 hover:bg-primary-200 transition-colors"
-                      >
-                        <Tag size={12} className="mr-1" />
-                        {tag}
-                      </Link>
-                    ))}
-                  </div>
-
-                  {/* Question Meta */}
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
-                        <User size={14} />
-                        <span>{question.author?.username}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock size={14} />
-                        <span>{formatDistanceToNow(new Date(question.createdAt), { addSuffix: true })}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
-                        <MessageSquare size={14} />
-                        <span>{question.answerCount || 0} answers</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Eye size={14} />
-                        <span>{question.views || 0} views</span>
-                      </div>
-                      {question.hasAcceptedAnswer && (
-                        <div className="flex items-center space-x-1 text-green-600">
-                          <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                          <span className="text-xs">Solved</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                <div className="text-gray-400 text-sm mb-1 line-clamp-2">
+                  {q.description?.replace(/<[^>]+>/g, '').slice(0, 120)}{q.description?.length > 120 ? '...' : ''}
+                </div>
+                <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+                  <span className="flex items-center gap-1"><User size={12} /> {q.author?.username || 'User'}</span>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2 min-w-[60px]">
+                <div className="bg-gray-800 text-primary-300 rounded px-3 py-1 text-sm font-bold flex items-center gap-1">
+                  {q.answerCount || 0} <span className="text-xs">ans</span>
                 </div>
               </div>
             </div>
@@ -280,33 +166,29 @@ const Questions = () => {
 
       {/* Pagination */}
       {pagination.total > 1 && (
-        <div className="flex items-center justify-center space-x-2">
+        <div className="flex justify-center items-center gap-2 mt-8">
           <button
-            onClick={() => {
-              const newParams = new URLSearchParams(searchParams);
-              newParams.set('page', pagination.current - 1);
-              setSearchParams(newParams);
-            }}
-            disabled={!pagination.hasPrev}
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => handlePage(Math.max(1, pagination.current - 1))}
+            disabled={pagination.current === 1}
+            className="px-2 py-1 rounded bg-gray-800 text-gray-300 hover:bg-primary-700 disabled:opacity-50"
           >
-            Previous
+            {'<'}
           </button>
-          
-          <span className="px-3 py-2 text-sm text-gray-600">
-            Page {pagination.current} of {pagination.total}
-          </span>
-          
+          {Array.from({ length: pagination.total }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePage(page)}
+              className={`px-3 py-1 rounded ${pagination.current === page ? 'bg-primary-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-primary-700'}`}
+            >
+              {page}
+            </button>
+          ))}
           <button
-            onClick={() => {
-              const newParams = new URLSearchParams(searchParams);
-              newParams.set('page', pagination.current + 1);
-              setSearchParams(newParams);
-            }}
-            disabled={!pagination.hasNext}
-            className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={() => handlePage(Math.min(pagination.total, pagination.current + 1))}
+            disabled={pagination.current === pagination.total}
+            className="px-2 py-1 rounded bg-gray-800 text-gray-300 hover:bg-primary-700 disabled:opacity-50"
           >
-            Next
+            {'>'}
           </button>
         </div>
       )}
