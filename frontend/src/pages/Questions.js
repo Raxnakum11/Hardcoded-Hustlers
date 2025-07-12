@@ -74,14 +74,9 @@ const Questions = () => {
 
   return (
     <div className="max-w-3xl mx-auto py-8">
-      {/* Filters and Search */}
+      {/* Filters Only (Removed Ask and Search) */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div className="flex gap-2 items-center">
-          {isAuthenticated && (
-            <Link to="/ask" className="btn-primary text-sm font-semibold">
-              <Plus size={16} className="inline mr-1" /> Ask New question
-            </Link>
-          )}
           {FILTERS.map((f) => (
             <button
               key={f.value}
@@ -113,53 +108,36 @@ const Questions = () => {
             )}
           </div>
         </div>
-        <form onSubmit={handleSearch} className="flex items-center w-full md:w-auto">
-          <input
-            type="text"
-            placeholder="Search"
-            value={filters.search}
-            onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
-            className="input-field w-full md:w-64 bg-gray-900 text-gray-100 border-gray-700"
-          />
-          <button type="submit" className="ml-2 p-2 rounded bg-primary-600 hover:bg-primary-700 text-white">
-            <Search size={18} />
-          </button>
-        </form>
       </div>
 
       {/* Questions List */}
-      <div className="space-y-6">
+      <div className="space-y-5">
         {loading ? (
-          <div className="text-center text-gray-400 py-12">Loading questions...</div>
+          <div className="text-center text-blue-400 py-16 text-lg font-semibold animate-pulse">Loading questions...</div>
         ) : questions.length === 0 ? (
-          <div className="text-center text-gray-400 py-12">No questions found.</div>
+          <div className="text-center text-blue-400 py-16 text-lg font-semibold">No questions found.</div>
         ) : (
           questions.map((q) => (
-            <div key={q._id} className="bg-gray-900 border border-gray-700 rounded-lg p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex-1">
-                <Link to={`/questions/${q._id}`} className="block text-lg font-semibold text-primary-400 hover:underline mb-1">
-                  {q.title}
-                </Link>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {q.tags?.map((tag) => (
-                    <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded bg-gray-800 text-xs text-primary-300 border border-primary-700">
-                      <Tag size={12} className="mr-1" /> {tag}
-                    </span>
-                  ))}
+            <Link
+              key={q._id}
+              to={`/questions/${q._id}`}
+              className="block bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer hover:bg-blue-50"
+              style={{ textDecoration: 'none' }}
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="text-lg font-semibold text-blue-900 group-hover:text-blue-600">
+                    {q.title}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1 line-clamp-2">
+                    {q.description?.replace(/<[^>]+>/g, '').slice(0, 120)}{q.description?.length > 120 ? '...' : ''}
+                  </div>
                 </div>
-                <div className="text-gray-400 text-sm mb-1 line-clamp-2">
-                  {q.description?.replace(/<[^>]+>/g, '').slice(0, 120)}{q.description?.length > 120 ? '...' : ''}
-                </div>
-                <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                  <span className="flex items-center gap-1"><User size={12} /> {q.author?.username || 'User'}</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-2 min-w-[60px]">
-                <div className="bg-gray-800 text-primary-300 rounded px-3 py-1 text-sm font-bold flex items-center gap-1">
-                  {q.answerCount || 0} <span className="text-xs">ans</span>
+                <div className="ml-4 text-sm bg-blue-100 text-blue-700 rounded-full px-3 py-1 font-semibold">
+                  {q.answerCount || 0} ans
                 </div>
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>

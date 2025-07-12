@@ -4,7 +4,7 @@ import { Bell, MessageSquare, ThumbsUp, User, X } from 'lucide-react';
 import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
 
-const NotificationDropdown = ({ onClose }) => {
+const NotificationDropdown = ({ onClose, onRead }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,6 +31,7 @@ const NotificationDropdown = ({ onClose }) => {
           notif._id === notificationId ? { ...notif, isRead: true } : notif
         )
       );
+      if (onRead) onRead();
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }

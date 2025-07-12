@@ -8,6 +8,8 @@ const { auth, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
+const ADMIN_EMAIL = 'parikhhet91@gmail.com';
+
 // @route   GET /api/questions
 // @desc    Get all questions with pagination and filters
 // @access  Public
@@ -204,7 +206,7 @@ router.put('/:id', auth, [
       return res.status(404).json({ message: 'Question not found' });
     }
 
-    if (!question.author.equals(req.user._id) && req.user.role !== 'admin') {
+    if (!question.author.equals(req.user._id) && req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
       return res.status(403).json({ message: 'Not authorized to edit this question' });
     }
 
@@ -249,7 +251,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Question not found' });
     }
 
-    if (!question.author.equals(req.user._id) && req.user.role !== 'admin') {
+    if (!question.author.equals(req.user._id) && req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
       return res.status(403).json({ message: 'Not authorized to delete this question' });
     }
 

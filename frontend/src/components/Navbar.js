@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -19,6 +19,34 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchUnreadCount();
+    }
+    // eslint-disable-next-line
+  }, [isAuthenticated]);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await fetch('/notifications?unread=true');
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadCount(data.unreadCount || 0);
+      }
+    } catch (e) {
+      setUnreadCount(0);
+    }
+  };
+
+  // When opening the dropdown, mark as read and update count
+  const handleNotificationClick = () => {
+    setIsNotificationOpen(!isNotificationOpen);
+    if (!isNotificationOpen) {
+      setUnreadCount(0);
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -32,6 +60,8 @@ const Navbar = () => {
     navigate('/');
     setIsMenuOpen(false);
   };
+
+  const ADMIN_EMAIL = 'parikhhet91@gmail.com';
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -54,7 +84,7 @@ const Navbar = () => {
                 Questions
               </Link>
               {/* Removed Tags and Users links for a simpler UI */}
-              {isAdmin && (
+              {user?.email === ADMIN_EMAIL && (
                 <Link 
                   to="/admin" 
                   className="text-gray-600 hover:text-primary-600 transition-colors flex items-center space-x-1"
@@ -97,17 +127,17 @@ const Navbar = () => {
                 {/* Notifications */}
                 <div className="relative">
                   <button
-                    onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                    onClick={handleNotificationClick}
                     className="relative p-2 text-gray-600 hover:text-primary-600 transition-colors"
                   >
                     <Bell size={20} />
-                    {/* Notification badge */}
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      3
-                    </span>
+                    {/* Notification badge: show only if unreadCount > 0 */}
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 rounded-full w-3 h-3 border-2 border-white" />
+                    )}
                   </button>
                   {isNotificationOpen && (
-                    <NotificationDropdown onClose={() => setIsNotificationOpen(false)} />
+                    <NotificationDropdown onClose={() => setIsNotificationOpen(false)} onRead={() => setUnreadCount((c) => Math.max(0, c - 1))} />
                   )}
                 </div>
 
@@ -130,22 +160,7 @@ const Navbar = () => {
                   {/* Dropdown menu */}
                   {isMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                      <Link
-                        to="/profile"
-                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <User size={16} />
-                        <span>Profile</span>
-                      </Link>
-                      <Link
-                        to="/profile"
-                        className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <Settings size={16} />
-                        <span>Settings</span>
-                      </Link>
+                      {/* Remove Profile and Settings links */}
                       <hr className="my-2" />
                       <button
                         onClick={handleLogout}

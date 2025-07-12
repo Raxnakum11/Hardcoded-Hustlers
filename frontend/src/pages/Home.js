@@ -43,7 +43,7 @@ const Home = () => {
           ) : questions.length === 0 ? (
             <div className="text-center text-blue-400 py-16 text-lg font-semibold">No questions found.</div>
           ) : (
-            questions.map((q) => (
+            questions.slice(0, 4).map((q) => (
               <Link
                 key={q._id}
                 to={`/questions/${q._id}`}
@@ -67,23 +67,6 @@ const Home = () => {
             ))
           )}
         </div>
-
-        {/* Pagination */}
-        {pagination.total > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-8">
-            <button onClick={() => handlePage(Math.max(1, pagination.current - 1))} disabled={pagination.current === 1} className="px-3 py-2 rounded-lg bg-gray-200 text-blue-500 hover:bg-blue-100 transition disabled:opacity-50">
-              {'<'}
-            </button>
-            {Array.from({ length: pagination.total }, (_, i) => i + 1).map((page) => (
-              <button key={page} onClick={() => handlePage(page)} className={`px-4 py-2 rounded-lg font-semibold ${pagination.current === page ? 'bg-blue-600 text-white' : 'bg-gray-200 text-blue-600 hover:bg-blue-100'}`}>
-                {page}
-              </button>
-            ))}
-            <button onClick={() => handlePage(Math.min(pagination.total, pagination.current + 1))} disabled={pagination.current === pagination.total} className="px-3 py-2 rounded-lg bg-gray-200 text-blue-500 hover:bg-blue-100 transition disabled:opacity-50">
-              {'>'}
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

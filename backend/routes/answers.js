@@ -8,6 +8,8 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
+const ADMIN_EMAIL = 'parikhhet91@gmail.com';
+
 // @route   POST /api/answers
 // @desc    Post an answer to a question
 // @access  Private
@@ -119,7 +121,7 @@ router.put('/:id', auth, [
       return res.status(404).json({ message: 'Answer not found' });
     }
 
-    if (!answer.author.equals(req.user._id) && req.user.role !== 'admin') {
+    if (!answer.author.equals(req.user._id) && req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
       return res.status(403).json({ message: 'Not authorized to edit this answer' });
     }
 
@@ -149,7 +151,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Answer not found' });
     }
 
-    if (!answer.author.equals(req.user._id) && req.user.role !== 'admin') {
+    if (!answer.author.equals(req.user._id) && req.user.role !== 'admin' && req.user.email !== ADMIN_EMAIL) {
       return res.status(403).json({ message: 'Not authorized to delete this answer' });
     }
 

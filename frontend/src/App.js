@@ -11,7 +11,6 @@ import QuestionDetail from './pages/QuestionDetail';
 import AskQuestion from './pages/AskQuestion';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Profile from './pages/Profile';
 import Tags from './pages/Tags';
 import Users from './pages/Users';
 import AdminDashboard from './pages/AdminDashboard';
@@ -36,7 +35,6 @@ function App() {
               <Route path="/ask" element={<AskQuestion />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/profile" element={<Profile />} />
               <Route path="/tags" element={<Tags />} />
               <Route path="/users" element={<Users />} />
               <Route path="/admin" element={<AdminDashboard />} />
