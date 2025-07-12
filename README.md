@@ -37,20 +37,4 @@ Whether you're a student seeking help, a developer sharing insights, or a curiou
 
 We are passionate developers building simple yet impactful platforms to empower communities through collaborative learning.
 
----
 
-## Installation & Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/<your-repo-name>.git
-
-# Navigate into the project folder
-cd stackit-forum
-
-# (Optional) Setup virtual environment or install dependencies
-# pip install -r requirements.txt   (for Python backend)
-# npm install                       (for Node.js backend)
-
-# Start the development server
-# npm start or python app.py (based on your backend)
