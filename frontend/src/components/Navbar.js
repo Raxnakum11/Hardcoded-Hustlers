@@ -53,18 +53,7 @@ const Navbar = () => {
               >
                 Questions
               </Link>
-              <Link 
-                to="/tags" 
-                className="text-gray-600 hover:text-primary-600 transition-colors"
-              >
-                Tags
-              </Link>
-              <Link 
-                to="/users" 
-                className="text-gray-600 hover:text-primary-600 transition-colors"
-              >
-                Users
-              </Link>
+              {/* Removed Tags and Users links for a simpler UI */}
               {isAdmin && (
                 <Link 
                   to="/admin" 
