@@ -31,9 +31,9 @@ Whether you're a student seeking help, a developer sharing insights, or a curiou
 ## Team: Hardcoded Hustlers 💻
 
 - **Raxeet Nakum - 23cs048@charusat.edu.in**  
-- **Het Parikh- 23cs053@charusat.edu.in**  
-- **Kunj Mungalpara-23cs047@charusat.edu.in**  
-- **Meet Mulani-23ce075@charusat.edu.in**
+- **Het Parikh - 23cs053@charusat.edu.in**  
+- **Kunj Mungalpara -23cs047@charusat.edu.in**  
+- **Meet Mulani -23ce075@charusat.edu.in**
 
 We are passionate developers building simple yet impactful platforms to empower communities through collaborative learning.
 
